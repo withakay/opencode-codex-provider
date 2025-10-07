@@ -1,13 +1,15 @@
 diff --git a/packages/opencode/src/provider/provider.ts b/packages/opencode/src/provider/provider.ts
-index c18bc489..5a2d21f4 100644
 --- a/packages/opencode/src/provider/provider.ts
 +++ b/packages/opencode/src/provider/provider.ts
-@@
-     const provider = s.providers[providerID]
-     if (!provider) throw new ModelNotFoundError({ providerID, modelID })
-     const info = provider.info.models[modelID]
+@@ -505,7 +505,38 @@
      if (!info) throw new ModelNotFoundError({ providerID, modelID })
- 
+-    const sdk = await getSDK(provider.info, info)
+-
+-    try {
+-      const language = provider.getModel ? await provider.getModel(sdk, modelID) : sdk.languageModel(modelID)
+-      log.info("found", { providerID, modelID })
+-      s.models.set(key, {
++
 +    const factoryModule =
 +      provider.options && typeof provider.options.providerFactory === "string"
 +        ? provider.options.providerFactory
@@ -44,8 +46,9 @@ index c18bc489..5a2d21f4 100644
 +      return result
 +    }
 +
-     const sdk = await getSDK(provider.info, info)
- 
-     try {
-       const language = provider.getModel ? await provider.getModel(sdk, modelID) : sdk.languageModel(modelID)
-       log.info("found", { providerID, modelID })
++    const sdk = await getSDK(provider.info, info)
++
++    try {
++      const language = provider.getModel ? await provider.getModel(sdk, modelID) : sdk.languageModel(modelID)
++      log.info("found", { providerID, modelID })
++      s.models.set(key, {
