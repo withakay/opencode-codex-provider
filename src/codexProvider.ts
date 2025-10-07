@@ -198,12 +198,6 @@ class CodexLanguageModel implements LanguageModelV2 {
             }
             if (!streamState.reasoningDeltaSeen) {
               streamState.pushReasoning(text, "agent_reasoning")
-            } else {
-              const prefixLength = sharedPrefixLength(lastReasoningMessage, text)
-              const delta = text.slice(prefixLength)
-              if (delta) {
-                streamState.pushReasoning(delta, "agent_reasoning_delta_from_full")
-              }
             }
             lastReasoningMessage = text
             return
@@ -225,9 +219,9 @@ class CodexLanguageModel implements LanguageModelV2 {
 
           if (type === "task_complete") {
             finishedViaNotification = true
-            if (typeof msg.last_agent_message === "string" && msg.last_agent_message && msg.last_agent_message.trim()) {
-              streamState.pushDelta("text", msg.last_agent_message, "task_complete")
-            }
+            // if (typeof msg.last_agent_message === "string" && msg.last_agent_message && msg.last_agent_message.trim()) {
+            //   streamState.pushDelta("text", msg.last_agent_message, "task_complete")
+            // }
             streamState.finish("stop")
             return
           }
@@ -296,7 +290,11 @@ class CodexLanguageModel implements LanguageModelV2 {
             throw new Error(text || "Codex MCP tool invocation failed")
           }
           if (text) {
-            streamState.pushDelta("text", text, "call_result")
+            const prefixLength = sharedPrefixLength(lastAgentMessage, text)
+            const delta = text.slice(prefixLength)
+            if (delta) {
+              streamState.pushDelta("text", delta, "call_result")
+            }
           }
           streamState.finish("stop")
         } catch (error) {
