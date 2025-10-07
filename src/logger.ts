@@ -1,4 +1,4 @@
-const shouldLog = () => process.env["OPENCODE_CODEX_PROVIDER_DEBUG"]?.toLowerCase() !== "false"
+const shouldLog = () => process.env["OPENCODE_CODEX_PROVIDER_DEBUG"]
 
 export const codexLog = (message: string, extra?: Record<string, any>) => {
   if (!shouldLog()) return
