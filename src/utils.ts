@@ -121,3 +121,42 @@ export function buildConversationPayload(messages: LanguageModelV2CallOptions["p
   const assistantText = assistantSegments.join("\n\n").trim()
   return { baseInstructions, userText, assistantText }
 }
+
+export function isLikelyText(value: string): boolean {
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index)
+    if (code === 0xfffd) return false
+    if (code < 0x20 && code !== 0x09 && code !== 0x0a && code !== 0x0d) {
+      return false
+    }
+  }
+  return true
+}
+
+export function decodeExecChunk(raw: string): string | null {
+  if (!raw) return null
+
+  const compressed = raw.replace(/\s+/g, "")
+  const base64Pattern = /^[A-Za-z0-9+/]+={0,2}$/
+  if (compressed.length > 0 && compressed.length % 4 === 0 && base64Pattern.test(compressed)) {
+    try {
+      const decoded = Buffer.from(compressed, "base64").toString("utf-8")
+      if (decoded && isLikelyText(decoded)) {
+        return decoded
+      }
+    } catch {
+      // ignore invalid base64
+    }
+  }
+
+  return isLikelyText(raw) ? raw : null
+}
+
+export function sharedPrefixLength(a: string, b: string): number {
+  const max = Math.min(a.length, b.length)
+  let index = 0
+  while (index < max && a.charCodeAt(index) === b.charCodeAt(index)) {
+    index += 1
+  }
+  return index
+}

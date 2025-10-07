@@ -8,7 +8,7 @@
     "./provider": "./src/codexProvider.ts"
   },
   "peerDependencies": {
-    "opencode": ">=0.14.4",
+        "opencode-ai": ">=0.14.4",
     "@ai-sdk/provider": ">=2.0.0"
   }
 }

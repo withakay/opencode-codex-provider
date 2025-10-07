@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "codex": {
+      "name": "Codex CLI",
+      "models": {
+        "gpt-5-codex": {
+          "name": "GPT-5-Codex"
+        },
+        "gpt-5": {
+          "name": "GPT-5"
+        }
+      }
+    }
+  },
+  "plugin": [
+    "opencode-codex-provider"
+  ]
+}
