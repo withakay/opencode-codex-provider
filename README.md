@@ -1,12 +1,14 @@
 # opencode-codex-provider
 
-`opencode-codex-provider` is an external plugin that lets the open-source **opencode** CLI run against the Codex MCP server that ships with OpenAI’s ChatGPT desktop apps. The plugin is intentionally small: it keeps the Codex-specific streaming logic out of the upstream opencode tree while still delivering a first-class streaming experience and minimal setup cost for users with a ChatGPT Pro subscription.
+`opencode-codex-provider` is an external 'plugin' (AKA hack) that lets the **opencode** CLI use OpenAI GTP 5 Codex model by abusing the Codex CLI's MCP server feature. 
 
 ---
 
 ## What problem does it solve?
 
-Opencode’s core distribution targets API-model providers (OpenAI, Anthropic, Bedrock, etc.). ChatGPT Pro customers, however, already have access to the Codex MCP server through the ChatGPT desktop app and its `codex` CLI binary. Using that local server is attractive because:
+Opencode’s core distribution targets API-model providers (OpenAI, Anthropic, Bedrock, etc.). 
+ChatGPT Pro customers have access to the Codex CLI but can't use their subs with the regular OpenAI API.
+Rather than integrate the OAuth flows and implement the Responses API I decided to take another approach, here we load codex cli as an MCP server, but we do so as a provider for opencode so when you type a prompt it gets sent directly to the codex.
 
 - **Zero extra API fees:** traffic stays inside the ChatGPT plan you already pay for.
 - **Lower latency & richer events:** the MCP server emits fine-grained notifications (agent messages, reasoning deltas, command output) that the stock opencode provider never surfaced.
