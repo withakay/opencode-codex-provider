@@ -1,0 +1,14 @@
+{
+  "name": "opencode-codex-provider",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./provider": "./src/codexProvider.ts"
+  },
+  "peerDependencies": {
+    "opencode": ">=0.14.4",
+    "@ai-sdk/provider": ">=2.0.0"
+  }
+}
