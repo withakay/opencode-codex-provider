@@ -1,4 +1,8 @@
 import { describe, test, expect, beforeEach, mock, spyOn } from "bun:test"
+import { mkdtempSync } from "node:fs"
+import { tmpdir } from "node:os"
+import path from "node:path"
+import { pathToFileURL } from "node:url"
 
 describe("Monkey Patch Application", () => {
   // Reset patch state before each test to ensure clean state
@@ -212,7 +216,7 @@ describe("Monkey Patch Application", () => {
 
   test("provides race condition protection", async () => {
     // Test that concurrent applications are properly synchronized
-    
+
     const { applyProviderFactoryPatch } = await import("../../src/monkeyPatch")
     
     // Create a mock Provider module for testing
@@ -244,6 +248,28 @@ describe("Monkey Patch Application", () => {
     results.forEach(result => {
       expect(result).toBeUndefined()
     })
+  })
+
+  test("resolves provider module relative to plugin directory", async () => {
+    const { __internal } = await import("../../src/monkeyPatch")
+
+    const originalCwd = process.cwd()
+    const tempDir = mkdtempSync(path.join(tmpdir(), "codex-provider-path-"))
+
+    try {
+      process.chdir(tempDir)
+      const resolvedUrl = __internal.resolveMonorepoProviderFileUrl()
+
+      const expectedPath = path.resolve(
+        __internal.moduleDir,
+        "../../opencode/packages/opencode/src/provider/provider.ts"
+      )
+      const expectedUrl = pathToFileURL(expectedPath).href
+
+      expect(resolvedUrl).toBe(expectedUrl)
+    } finally {
+      process.chdir(originalCwd)
+    }
   })
 })
 

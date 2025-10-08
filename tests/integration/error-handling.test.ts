@@ -58,7 +58,7 @@ describe("Error Handling", () => {
       if (providerModuleAvailable) {
         // Try to import Provider module for error type access
         const path = require('path')
-        const absolutePath = path.resolve(process.cwd(), '../../opencode/opencode/packages/opencode/src/provider/provider.ts')
+        const absolutePath = path.resolve(process.cwd(), '../../opencode/packages/opencode/src/provider/provider.ts')
         const fileUrl = `file://${absolutePath}`
         ProviderModule = await import(fileUrl)
       }

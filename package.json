@@ -12,7 +12,7 @@
   },
   "exports": {
     ".": "./index.ts",
-    "./provider": "./src/codexProvider.ts"
+    "./provider": "./provider.ts"
   },
   "peerDependencies": {
     "opencode-ai": ">=0.14.4",
@@ -21,5 +21,6 @@
   "devDependencies": {
     "@types/bun": "^1.2.21",
     "typescript": "^5.8.2"
-  }
+  },
+  "private": true
 }

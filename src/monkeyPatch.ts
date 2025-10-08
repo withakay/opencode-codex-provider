@@ -1,3 +1,6 @@
+import path from "node:path"
+import { fileURLToPath, pathToFileURL } from "node:url"
+
 import { codexLog } from "./logger"
 
 // Cache management configuration
@@ -25,9 +28,16 @@ interface CacheEntry {
  * These paths are tried in order when importing the Provider module.
  */
 const IMPORT_PATHS = {
-  RELATIVE_PROVIDER: "../../opencode/opencode/packages/opencode/src/provider/provider.ts",
+  RELATIVE_PROVIDER: "../../opencode/packages/opencode/src/provider/provider.ts",
   INSTALLED_PROVIDER: "opencode/provider/provider"
 } as const
+
+const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url))
+
+function resolveMonorepoProviderFileUrl(): string {
+  const absolutePath = path.resolve(MODULE_DIR, IMPORT_PATHS.RELATIVE_PROVIDER)
+  return pathToFileURL(absolutePath).href
+}
 
 /**
  * Standardized error messages for consistent logging and error reporting.
@@ -258,11 +268,7 @@ class CustomInitError extends Error {
 const PROVIDER_IMPORT_STRATEGIES = [
   {
     name: "file_url_absolute",
-    getPath: () => {
-      const path = require('path')
-      const absolutePath = path.resolve(process.cwd(), IMPORT_PATHS.RELATIVE_PROVIDER)
-      return `file://${absolutePath}`
-    }
+    getPath: () => resolveMonorepoProviderFileUrl()
   },
   {
     name: "relative_typescript",
@@ -930,4 +936,9 @@ function createEnrichedErrorContext(
     ...baseContext,
     recoveryInfo: ERROR_RECOVERY_DOCS[errorType]
   }
+}
+
+export const __internal = {
+  moduleDir: MODULE_DIR,
+  resolveMonorepoProviderFileUrl
 }

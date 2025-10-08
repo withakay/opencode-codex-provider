@@ -91,7 +91,7 @@ describe("Provider Loading Integration", () => {
     expect(async () => {
       // Import the Provider module using file URL (same as monkey patch)
       const path = require('path')
-      const absolutePath = path.resolve(process.cwd(), '../../opencode/opencode/packages/opencode/src/provider/provider.ts')
+      const absolutePath = path.resolve(process.cwd(), '../../opencode/packages/opencode/src/provider/provider.ts')
       const fileUrl = `file://${absolutePath}`
       const { Provider } = await import(fileUrl)
       
@@ -126,7 +126,7 @@ describe("Provider Loading Integration", () => {
     // Test the factory loading by calling getModel with a codex provider
     try {
       const path = require('path')
-      const absolutePath = path.resolve(process.cwd(), '../../opencode/opencode/packages/opencode/src/provider/provider.ts')
+      const absolutePath = path.resolve(process.cwd(), '../../opencode/packages/opencode/src/provider/provider.ts')
       const fileUrl = `file://${absolutePath}`
       const { Provider } = await import(fileUrl)
       
