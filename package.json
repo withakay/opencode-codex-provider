@@ -1,14 +1,25 @@
 {
   "name": "opencode-codex-provider",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "main": "./index.ts",
+  "scripts": {
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "test:unit": "bun test tests/unit",
+    "test:integration": "bun test tests/integration",
+    "typecheck": "tsc --noEmit"
+  },
   "exports": {
     ".": "./index.ts",
     "./provider": "./src/codexProvider.ts"
   },
   "peerDependencies": {
-        "opencode-ai": ">=0.14.4",
+    "opencode-ai": ">=0.14.4",
     "@ai-sdk/provider": ">=2.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.21",
+    "typescript": "^5.8.2"
   }
 }
