@@ -81,7 +81,7 @@ bun add opencode-codex-provider
 Add to `opencode.json`:
 ```json
 {
-  "plugins": [
+  "plugin": [
     "opencode-codex-provider"
   ]
 }
@@ -100,7 +100,7 @@ For local development or testing unreleased changes:
 2. **Add to opencode.json using file:// reference**
    ```json
    {
-     "plugins": [
+     "plugin": [
        "file:/path/to/your/opencode-codex-provider"
      ]
    }
@@ -109,7 +109,7 @@ For local development or testing unreleased changes:
    **Example paths:**
    ```json
    {
-     "plugins": [
+     "plugin": [
        "file:/Users/jack/Code/opencode/opencode-codex-provider",
        "file:../opencode-codex-provider",
        "file:./plugins/opencode-codex-provider"

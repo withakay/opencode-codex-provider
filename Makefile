@@ -70,24 +70,24 @@ test-coverage:
 # Run linter
 lint:
 	@echo "Running linter..."
-	bun run lint || true
+	bun run lint
 
 # Fix linting issues
 lint-fix:
 	@echo "Fixing linting issues..."
-	bun run lint:fix || true
+	bun run lint:fix
 
 # Run TypeScript type checking
 typecheck:
 	@echo "Running TypeScript type checking..."
-	bun run typecheck || true
+	bun run typecheck
 
 # Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
 	rm -rf dist
 	rm -rf node_modules/.cache
-	bun run clean || true
+	bun run clean
 	@echo "Clean complete"
 
 # Development mode
@@ -125,7 +125,7 @@ install-local:
 		exit 1; \
 	fi
 
-# Uninstall plugin from local opencode workspace  
+# Uninstall plugin from local opencode workspace
 uninstall-local:
 	@echo "Uninstalling plugin from local opencode workspace..."
 	@if [ -d "../opencode" ]; then \
