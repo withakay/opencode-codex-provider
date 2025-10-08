@@ -22,7 +22,7 @@ export const CodexProviderPlugin: Plugin = async () => {
       if (!options.providerFactory) {
         const isFileProtocol = import.meta.url.startsWith("file://")
         if (isFileProtocol) {
-          options.providerFactory = new URL("./provider.ts", import.meta.url).pathname
+          options.providerFactory = fileURLToPath(new URL("./provider.ts", import.meta.url))
         } else {
           options.providerFactory = "opencode-codex-provider/provider"
         }
