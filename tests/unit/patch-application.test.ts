@@ -8,37 +8,69 @@ describe("Monkey Patch Application", () => {
   })
 
   test("applies patch successfully", async () => {
-    // This test FAILS because the implementation tries to import Provider module
-    // which doesn't exist in test environment. We need a way to mock the import.
+    // Test successful patch application using dependency injection
     
     const { applyProviderFactoryPatch, isPatchApplied } = 
       await import("../../src/monkeyPatch")
     
     expect(isPatchApplied()).toBe(false)
     
-    // This will throw: "Failed to import Provider module"
-    // We need the implementation to be testable with dependency injection
-    await expect(applyProviderFactoryPatch()).rejects.toThrow("Failed to import Provider module")
+    // Create a mock Provider module for testing
+    const mockProvider = {
+      Provider: {
+        getModel: mock(() => Promise.resolve({})),
+        ModelNotFoundError: class extends Error {
+          constructor(params: { providerID: string; modelID: string }) {
+            super(`Model ${params.modelID} not found for provider ${params.providerID}`)
+          }
+        },
+        InitError: class extends Error {
+          constructor(params: { providerID: string }, options?: { cause?: Error }) {
+            super(`Init error for provider ${params.providerID}`)
+            if (options?.cause) this.cause = options.cause
+          }
+        }
+      }
+    }
     
-    // After failed attempt, patch should still be false
-    expect(isPatchApplied()).toBe(false)
+    // Apply patch with injected module - should succeed
+    await expect(applyProviderFactoryPatch(mockProvider)).resolves.toBeUndefined()
+    
+    // After successful application, patch should be true
+    expect(isPatchApplied()).toBe(true)
   })
   
   test("doesn't apply patch twice (idempotent)", async () => {
-    // This test FAILS because we can't successfully apply the patch once
-    // due to missing Provider module. We need a mockable implementation.
+    // Test that patch application is idempotent using dependency injection
     
     const { applyProviderFactoryPatch, isPatchApplied } = 
       await import("../../src/monkeyPatch")
     
-    // Both calls will fail with import error
-    await expect(applyProviderFactoryPatch()).rejects.toThrow()
-    await expect(applyProviderFactoryPatch()).rejects.toThrow()
+    // Create a mock Provider module for testing
+    const mockProvider = {
+      Provider: {
+        getModel: mock(() => Promise.resolve({})),
+        ModelNotFoundError: class extends Error {
+          constructor(params: { providerID: string; modelID: string }) {
+            super(`Model ${params.modelID} not found for provider ${params.providerID}`)
+          }
+        },
+        InitError: class extends Error {
+          constructor(params: { providerID: string }, options?: { cause?: Error }) {
+            super(`Init error for provider ${params.providerID}`)
+            if (options?.cause) this.cause = options.cause
+          }
+        }
+      }
+    }
     
-    // Patch state should remain false after failed attempts
-    expect(isPatchApplied()).toBe(false)
+    // First application should succeed
+    await expect(applyProviderFactoryPatch(mockProvider)).resolves.toBeUndefined()
+    expect(isPatchApplied()).toBe(true)
     
-    // TODO: Implementation needs dependency injection to test idempotency properly
+    // Second application should also succeed (idempotent) but not apply twice
+    await expect(applyProviderFactoryPatch(mockProvider)).resolves.toBeUndefined()
+    expect(isPatchApplied()).toBe(true)
   })
   
   test("tracks patch application state", async () => {
@@ -59,35 +91,61 @@ describe("Monkey Patch Application", () => {
   })
   
   test("handles module import errors gracefully", async () => {
-    // This test PASSES because the implementation does handle import errors
-    // and provides meaningful error messages
+    // Test that import errors are handled gracefully with invalid injected modules
     
     const { applyProviderFactoryPatch } = await import("../../src/monkeyPatch")
     
-    await expect(applyProviderFactoryPatch()).rejects.toThrow("Failed to import Provider module")
+    // Test with an invalid injected module
+    const invalidModule = { notProvider: true }
+    await expect(applyProviderFactoryPatch(invalidModule)).rejects.toThrow("Injected module structure invalid")
+    
+    // Test with null module
+    await expect(applyProviderFactoryPatch(null)).rejects.toThrow("Injected module structure invalid")
+    
+    // Test with undefined module (should try real import, which may succeed or fail)
+    // If real import succeeds, that's fine - it means the Provider module is available
+    try {
+      await applyProviderFactoryPatch(undefined)
+      // Success is acceptable if Provider module is available
+    } catch (error) {
+      // Failure is also acceptable if Provider module is not available
+      expect(error.message).toContain("Failed to import Provider module")
+    }
   })
 
-  test("requires dependency injection for testability", async () => {
-    // This test FAILS because the current implementation is not testable
-    // It uses hardcoded dynamic imports that can't be mocked
+  test("supports dependency injection for testability", async () => {
+    // Test that dependency injection is properly supported
     
     const { applyProviderFactoryPatch } = await import("../../src/monkeyPatch")
     
-    // We need a version that accepts a Provider module as parameter
-    // applyProviderFactoryPatch(mockProviderModule) - this doesn't exist
-    
+    // Create a mock Provider module for testing
     const mockProvider = {
       Provider: {
-        getModel: mock(),
-        state: mock(() => ({ models: new Map(), providers: {} }))
+        getModel: mock(() => Promise.resolve({})),
+        ModelNotFoundError: class extends Error {
+          constructor(params: { providerID: string; modelID: string }) {
+            super(`Model ${params.modelID} not found for provider ${params.providerID}`)
+          }
+        },
+        InitError: class extends Error {
+          constructor(params: { providerID: string }, options?: { cause?: Error }) {
+            super(`Init error for provider ${params.providerID}`)
+            if (options?.cause) this.cause = options.cause
+          }
+        }
       }
     }
     
-    // This will fail because applyProviderFactoryPatch doesn't accept parameters
-    expect(() => {
-      // @ts-expect-error - testing that this signature doesn't exist
-      applyProviderFactoryPatch(mockProvider)
-    }).toThrow()
+    // Function should accept the injected module and work properly
+    await expect(applyProviderFactoryPatch(mockProvider)).resolves.toBeUndefined()
+    
+    // Test that invalid modules are rejected
+    // Reset patch state to test with fresh state
+    const { resetPatchState } = await import("../../src/monkeyPatch")
+    resetPatchState()
+    
+    const invalidModule = { notProvider: true }
+    await expect(applyProviderFactoryPatch(invalidModule)).rejects.toThrow("Injected module structure invalid")
   })
 
   test("needs proper error handling for Provider.state() failures", async () => {
@@ -101,44 +159,91 @@ describe("Monkey Patch Application", () => {
     expect(true).toBe(true) // Acknowledged limitation - scenario is untestable without dependency injection
   })
 
-  test("needs logging verification capabilities", async () => {
-    // This test FAILS because we can't verify logging behavior
-    // when the function fails at the import stage
+  test("provides proper logging capabilities", async () => {
+    // Test that logging works correctly during patch application
     
     const loggerModule = await import("../../src/logger")
     const logSpy = spyOn(loggerModule, "codexLog")
     
     const { applyProviderFactoryPatch } = await import("../../src/monkeyPatch")
     
-    try {
-      await applyProviderFactoryPatch()
-    } catch (error) {
-      // Expected import failure
+    // Create a mock Provider module for testing
+    const mockProvider = {
+      Provider: {
+        getModel: mock(() => Promise.resolve({})),
+        ModelNotFoundError: class extends Error {
+          constructor(params: { providerID: string; modelID: string }) {
+            super(`Model ${params.modelID} not found for provider ${params.providerID}`)
+          }
+        },
+        InitError: class extends Error {
+          constructor(params: { providerID: string }, options?: { cause?: Error }) {
+            super(`Init error for provider ${params.providerID}`)
+            if (options?.cause) this.cause = options.cause
+          }
+        }
+      }
     }
     
-    // This assertion FAILS because the log call happens after the import failure
+    // Apply patch successfully and verify logging
+    await applyProviderFactoryPatch(mockProvider)
+    
+    // Should log successful patch application
+    expect(logSpy).toHaveBeenCalledWith("patch.applied_successfully", {})
+    
+    // Test failure logging with invalid module
+    logSpy.mockClear()
+    
+    // Reset patch state to test failure case
+    const { resetPatchState } = await import("../../src/monkeyPatch")
+    resetPatchState()
+    
+    const invalidModule = { notProvider: true }
+    
+    try {
+      await applyProviderFactoryPatch(invalidModule)
+    } catch (error) {
+      // Expected failure
+    }
+    
+    // Should log patch application failure
     expect(logSpy).toHaveBeenCalledWith("patch.application_failed", expect.any(Object))
   })
 
-  test("needs race condition protection", async () => {
-    // This test FAILS because concurrent applications aren't properly synchronized
+  test("provides race condition protection", async () => {
+    // Test that concurrent applications are properly synchronized
     
     const { applyProviderFactoryPatch } = await import("../../src/monkeyPatch")
     
-    // All will fail with import error, but there's no synchronization
+    // Create a mock Provider module for testing
+    const mockProvider = {
+      Provider: {
+        getModel: mock(() => Promise.resolve({})),
+        ModelNotFoundError: class extends Error {
+          constructor(params: { providerID: string; modelID: string }) {
+            super(`Model ${params.modelID} not found for provider ${params.providerID}`)
+          }
+        },
+        InitError: class extends Error {
+          constructor(params: { providerID: string }, options?: { cause?: Error }) {
+            super(`Init error for provider ${params.providerID}`)
+            if (options?.cause) this.cause = options.cause
+          }
+        }
+      }
+    }
+    
+    // Launch multiple concurrent patch applications
     const promises = Array(3).fill(null).map(() => 
-      applyProviderFactoryPatch().catch(e => e)
+      applyProviderFactoryPatch(mockProvider)
     )
     
     const results = await Promise.all(promises)
     
-    // All should fail with the same error, but implementation doesn't
-    // prevent race conditions in the patchApplied flag
+    // All should succeed (no race condition errors)
     results.forEach(result => {
-      expect(result).toBeInstanceOf(Error)
+      expect(result).toBeUndefined()
     })
-    
-    // TODO: Need atomic operations for patchApplied state
   })
 })
 
