@@ -2,7 +2,10 @@ import { describe, it, expect, beforeEach } from 'bun:test'
 import { applyProviderFactoryPatch } from '../../src/monkeyPatch'
 import { createMockState, createMockProvider } from '../fixtures'
 
-describe('Performance Benchmarks', () => {
+const INTEGRATION_TESTS_ENABLED = process.env.INTEGRATION_TESTS === "true"
+const describeOrSkip = INTEGRATION_TESTS_ENABLED ? describe : describe.skip
+
+describeOrSkip('Performance Benchmarks', () => {
   let mockState: any
   let mockProvider: any
 

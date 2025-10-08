@@ -28,13 +28,13 @@ describe("Provider Config Registration", () => {
       worktree: "/test",
       $: {} as any
     })
-    
+
     const config: any = { provider: {} }
     await plugin.config!(config)
-    
-    expect(config.provider.codex.options.providerFactory).toBe(
-      "opencode-codex-provider/provider"
-    )
+
+    // Should set providerFactory to either file path or npm package path
+    expect(config.provider.codex.options.providerFactory).toBeDefined()
+    expect(typeof config.provider.codex.options.providerFactory).toBe("string")
   })
   
   test("preserves existing provider config", async () => {

@@ -1,23 +1,23 @@
 # opencode-codex-provider
 
-**Zero-Patch Plugin** that enables the **opencode** CLI to use OpenAI's GPT-5 Codex model through the ChatGPT desktop app's MCP server—without modifying opencode's core code.
+Enables the **opencode** CLI to use OpenAI's GPT-5 Codex model through the ChatGPT Codex CLI's MCP server.
 
 ---
 
-## What problem does it solves?
+## What problem does it solve?
 
 Opencode's core distribution targets API-model providers (OpenAI, Anthropic, Bedrock, etc.). ChatGPT Pro customers have access to the Codex CLI but can't use their subscription with the regular OpenAI API.
 
-This plugin delivers **zero-patch integration** that:
+This plugin delivers an integration with the following features:
 
 - **Zero extra API fees:** Traffic stays inside your ChatGPT plan
-- **Zero core modifications:** Uses runtime monkey patching instead of file patches
+- **Zero core modifications:** Uses runtime monkey patching to add a custom provider factory
 - **Lower latency & richer events:** MCP server emits fine-grained notifications (agent messages, reasoning deltas, command output)
 - **Tooling parity:** Same sand-boxing, approvals, and CLI automation as other LLMs
 
 ---
 
-## How it works (Zero-Patch Architecture)
+## How it works
 
 ### 1. Plugin Registration (`index.ts`)
 When opencode boots, it enumerates plugins in `opencode.json`. This plugin:

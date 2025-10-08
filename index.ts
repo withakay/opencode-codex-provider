@@ -1,5 +1,6 @@
 import type { Plugin, Hooks } from "@opencode-ai/plugin"
 import { createCodexProvider } from "./src/codexProvider"
+import { fileURLToPath } from "node:url"
 
 const PACKAGE_NAME = "opencode-codex-provider"
 

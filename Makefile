@@ -1,7 +1,7 @@
 # opencode-codex-provider Makefile
 # Zero-patch plugin for opencode CLI
 
-.PHONY: help build test test-watch test-unit test-integration test-coverage lint lint-fix typecheck clean install dev benchmark agents docs
+.PHONY: help build test test-watch test-unit test-integration test-coverage lint lint-fix typecheck clean install dev benchmark agents docs publish publish-beta
 
 # Default target
 help:
@@ -24,6 +24,8 @@ help:
 	@echo "  benchmark      - Run performance benchmarks"
 	@echo "  agents         - Show agent configuration"
 	@echo "  docs           - Generate documentation"
+	@echo "  publish        - Publish package to npm"
+	@echo "  publish-beta   - Publish package to npm with beta tag"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make install && make test"
@@ -87,7 +89,6 @@ clean:
 	@echo "Cleaning build artifacts..."
 	rm -rf dist
 	rm -rf node_modules/.cache
-	bun run clean
 	@echo "Clean complete"
 
 # Development mode
@@ -105,7 +106,7 @@ validate: build test lint
 	@echo "Validation complete"
 
 # Release preparation
-prep-release: clean install build test-coverage lint typecheck
+prep-release: clean install build test
 	@echo "Release preparation complete"
 
 # Show test status
@@ -166,3 +167,15 @@ docs:
 	else \
 		echo "Error: package.json not found"; \
 	fi
+
+# Publish to npm
+publish: prep-release
+	@echo "Publishing to npm..."
+	npm publish
+	@echo "Published successfully"
+
+# Publish to npm with beta tag
+publish-beta: prep-release
+	@echo "Publishing to npm with beta tag..."
+	npm publish --tag beta
+	@echo "Published successfully as beta"

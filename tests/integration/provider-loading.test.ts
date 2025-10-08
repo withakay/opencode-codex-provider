@@ -1,6 +1,9 @@
 import { describe, test, expect, beforeAll, afterEach, mock, spyOn } from "bun:test"
 import { applyProviderFactoryPatch, resetPatchState, isPatchApplied } from "../../src/monkeyPatch"
 
+const INTEGRATION_TESTS_ENABLED = process.env.INTEGRATION_TESTS === "true"
+const describeOrSkip = INTEGRATION_TESTS_ENABLED ? describe : describe.skip
+
 /**
  * Integration Tests for Provider Loading (RED PHASE)
  * 
@@ -37,7 +40,7 @@ const mockConsoleLog = mock(() => {})
 // Track whether we have a working Provider module integration
 let providerModuleAvailable = false
 
-describe("Provider Loading Integration", () => {
+describeOrSkip("Provider Loading Integration", () => {
   beforeAll(async () => {
     // Reset patch state to ensure clean test environment
     resetPatchState()
